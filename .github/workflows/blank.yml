@@ -220,12 +220,12 @@ jobs:
 
       - name: Delete existing release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.MYUSER_TOKEN }}
         run: gh release delete $RELEASE_DATE --yes || true
 
       - name: Create new release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.MYUSER_TOKEN }}
         run: gh release create $RELEASE_DATE -t "Release $RELEASE_DATE" -n "Automated release for $RELEASE_DATE"
 
       - name: Download Artifacts
@@ -269,7 +269,7 @@ jobs:
 
       - name: Upload Artifacts to Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.MYUSER_TOKEN }}
         run: |
           cd ./artifacts
           gh release upload $RELEASE_DATE ./vc_lib_dbg_win32.zip
