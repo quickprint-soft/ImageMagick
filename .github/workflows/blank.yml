@@ -1,0 +1,278 @@
+name: CI
+on:
+  repository_dispatch:
+    types:
+      - webhook-1
+      - webhook-2
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  msw-msvs:
+    runs-on: windows-${{ matrix.vsversion }}
+    name: wxMSW vs${{ matrix.vsversion }} ${{ matrix.configuration }} ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - configuration: 'Debug'
+          #   platform: 'Win32'
+          #   vsversion: 2022
+          # - configuration: 'Release'
+          #   platform: 'Win32'
+          #   vsversion: 2022
+          # - configuration: 'Debug'
+            platform: 'x64'
+            vsversion: 2022
+          - configuration: 'Release'
+            platform: 'x64'
+            vsversion: 2022
+          # - configuration: 'DLL Debug'
+          #   platform: 'Win32'
+          #   vsversion: 2022
+          # - configuration: 'DLL Release'
+          #   platform: 'Win32'
+          #   vsversion: 2022
+          # - configuration: 'DLL Debug'
+          #   platform: 'x64'
+          #   vsversion: 2022
+          # - configuration: 'DLL Release'
+          #   platform: 'x64'
+          #   vsversion: 2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: update depend
+        shell: cmd
+        run: |
+          clone-repositories-im7.cmd
+          
+      - name: Configure build options
+        working-directory: Configure\Artifacts\Release\x64\bin
+        shell: cmd
+        run: |
+          Configure.Release.x64.exe /noWizard /VS2022 /x64 /static /noHdri /Q16 /openPolicy /incompatibleLicense /includeOptional
+          
+        # run: |
+        #   $use_utf8 = "${{ matrix.use_utf8 }}" ? 1 : 0
+        #   if ( $use_utf8 ) {
+        #     $txt = Get-Content setup.h
+        #     Write-Output $txt |
+        #     %{$_ -replace "define wxUSE_UNICODE_UTF8 0", "define wxUSE_UNICODE_UTF8 $use_utf8"} |
+        #     Set-Content setup.h
+        #   }
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-prerelease: true
+
+      - name: Build
+        run: |
+          msbuild /noLogo /m "/p:Configuration=${{ matrix.configuration }}" /p:Platform=${{ matrix.platform }} build\msw\wx_vc16.sln
+          if ( '${{ matrix.configuration }}'.IndexOf('DLL') -ne -1 ) {
+            if ( '${{ matrix.platform }}' -eq 'Win32') {
+              $dlldir = Join-Path (Get-Location) 'lib\vc_dll'
+            } else {
+              $dlldir = Join-Path (Get-Location) 'lib\vc_x64_dll'
+            }
+            Write-Output "Adding $dlldir to the PATH"
+            $dlldir | Out-File -Append $env:GITHUB_PATH
+          }
+
+      # Static library packaging (删除 .pdb)
+      - name: Package Debug files (Win32)
+        if: matrix.configuration == 'Debug' && matrix.platform == 'Win32'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_lib ./package/
+          Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload Debug artifact (Win32)
+        if: matrix.configuration == 'Debug' && matrix.platform == 'Win32'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_lib_dbg_win32
+          path: package
+
+      - name: Package Release files (Win32)
+        if: matrix.configuration == 'Release' && matrix.platform == 'Win32'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_lib ./package/
+          Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload Release artifact (Win32)
+        if: matrix.configuration == 'Release' && matrix.platform == 'Win32'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_lib_rel_win32
+          path: package
+
+      - name: Package Debug files (x64)
+        if: matrix.configuration == 'Debug' && matrix.platform == 'x64'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_x64_lib ./package/
+          Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload Debug artifact (x64)
+        if: matrix.configuration == 'Debug' && matrix.platform == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_lib_dbg_x64
+          path: package
+
+      - name: Package Release files (x64)
+        if: matrix.configuration == 'Release' && matrix.platform == 'x64'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_x64_lib ./package/
+          Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload Release artifact (x64)
+        if: matrix.configuration == 'Release' && matrix.platform == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_lib_rel_x64
+          path: package
+
+      # DLL packaging (删除 .pdb)
+      - name: Package DLL Debug files (Win32)
+        if: matrix.configuration == 'DLL Debug' && matrix.platform == 'Win32'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_dll ./package/
+          Get-ChildItem -Path ./package/vc_dll -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload DLL Debug artifact (Win32)
+        if: matrix.configuration == 'DLL Debug' && matrix.platform == 'Win32'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_dll_dbg_win32
+          path: package
+
+      - name: Package DLL Release files (Win32)
+        if: matrix.configuration == 'DLL Release' && matrix.platform == 'Win32'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_dll ./package/
+          Get-ChildItem -Path ./package/vc_dll -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload DLL Release artifact (Win32)
+        if: matrix.configuration == 'DLL Release' && matrix.platform == 'Win32'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_dll_rel_win32
+          path: package
+
+      - name: Package DLL Debug files (x64)
+        if: matrix.configuration == 'DLL Debug' && matrix.platform == 'x64'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_x64_dll ./package/
+          Get-ChildItem -Path ./package/vc_x64_dll -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload DLL Debug artifact (x64)
+        if: matrix.configuration == 'DLL Debug' && matrix.platform == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_dll_dbg_x64
+          path: package
+
+      - name: Package DLL Release files (x64)
+        if: matrix.configuration == 'DLL Release' && matrix.platform == 'x64'
+        run: |
+          mkdir -p package
+          mv ./include ./package/
+          mv ./lib/vc_x64_dll ./package/
+          Get-ChildItem -Path ./package/vc_x64_dll -Filter *.pdb -Recurse | Remove-Item -Force
+      - name: Upload DLL Release artifact (x64)
+        if: matrix.configuration == 'DLL Release' && matrix.platform == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vc_dll_rel_x64
+          path: package
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: msw-msvs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up environment
+        run: echo "RELEASE_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - name: Install GitHub CLI
+        uses: sersoft-gmbh/setup-gh-cli-action@v2
+
+      - name: Delete existing release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete $RELEASE_DATE --yes || true
+
+      - name: Create new release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create $RELEASE_DATE -t "Release $RELEASE_DATE" -n "Automated release for $RELEASE_DATE"
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Compress Artifacts
+        run: |
+          cd ./artifacts/vc_lib_dbg_win32
+          zip -r ../vc_lib_dbg_win32.zip ./*
+
+          cd ../vc_lib_rel_win32
+          zip -r ../vc_lib_rel_win32.zip ./*
+
+          cd ../vc_lib_dbg_x64
+          zip -r ../vc_lib_dbg_x64.zip ./*
+
+          cd ../vc_lib_rel_x64
+          zip -r ../vc_lib_rel_x64.zip ./*
+
+          cd ../vc_dll_dbg_win32
+          zip -r ../vc_dll_dbg_win32.zip ./*
+
+          cd ../vc_dll_rel_win32
+          zip -r ../vc_dll_rel_win32.zip ./*
+
+          cd ../vc_dll_dbg_x64
+          zip -r ../vc_dll_dbg_x64.zip ./*
+
+          cd ../vc_dll_rel_x64
+          zip -r ../vc_dll_rel_x64.zip ./*
+
+      - name: Generate MD5 Checksums
+        run: |
+          > ./artifacts/filelist.txt
+          for file in ./artifacts/*.zip; do
+            md5sum=$(md5sum "$file" | awk '{ print $1 }')
+            echo "$(basename "$file") | ${md5sum}" >> ./artifacts/filelist.txt
+          done
+
+      - name: Upload Artifacts to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./artifacts
+          gh release upload $RELEASE_DATE ./vc_lib_dbg_win32.zip
+          gh release upload $RELEASE_DATE ./vc_lib_rel_win32.zip
+          gh release upload $RELEASE_DATE ./vc_lib_dbg_x64.zip
+          gh release upload $RELEASE_DATE ./vc_lib_rel_x64.zip
+          gh release upload $RELEASE_DATE ./vc_dll_dbg_win32.zip
+          gh release upload $RELEASE_DATE ./vc_dll_rel_win32.zip
+          gh release upload $RELEASE_DATE ./vc_dll_dbg_x64.zip
+          gh release upload $RELEASE_DATE ./vc_dll_rel_x64.zip
+          gh release upload $RELEASE_DATE ./filelist.txt
