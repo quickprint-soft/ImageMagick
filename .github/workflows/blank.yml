@@ -89,7 +89,7 @@ jobs:
           mkdir -p package
           mv ./Artifacts/include ./package/
           mv ./Artifacts/lib  ./package/vc_lib
-          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
+          cp -r ./ImageMagick/Magick++ ./package/
           cp -r ./ImageMagick/MagickCore ./package/
           cp -r ./ImageMagick/MagickWand ./package/
           #mv ./include ./package/
@@ -110,7 +110,7 @@ jobs:
           mv ./Artifacts/lib  ./package/vc_lib
           cp -r ./ImageMagick/MagickCore ./package/
           cp -r ./ImageMagick/MagickWand ./package/
-          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
+          cp -r ./ImageMagick/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_lib ./package/
           Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -129,7 +129,7 @@ jobs:
           mv ./Artifacts/lib  ./package/vc_x64_lib
           cp -r ./ImageMagick/MagickCore ./package/
           cp -r ./ImageMagick/MagickWand ./package/
-          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
+          cp -r ./ImageMagick/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -148,7 +148,7 @@ jobs:
           mv ./Artifacts/lib  ./package/vc_x64_lib
           cp -r ./ImageMagick/MagickCore ./package/
           cp -r ./ImageMagick/MagickWand ./package/
-          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
+          cp -r ./ImageMagick/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
