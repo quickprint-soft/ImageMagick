@@ -89,6 +89,7 @@ jobs:
           mkdir -p package
           mv ./Artifacts/include ./package/
           mv ./Artifacts/lib  ./package/vc_lib
+          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
           #mv ./include ./package/
           #mv ./lib/vc_lib ./package/
           Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -105,6 +106,7 @@ jobs:
           mkdir -p package
           mv ./Artifacts/include ./package/
           mv ./Artifacts/lib  ./package/vc_lib
+          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_lib ./package/
           Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -121,7 +123,7 @@ jobs:
           mkdir -p package
           mv ./Artifacts/include ./package/
           mv ./Artifacts/lib  ./package/vc_x64_lib
-          
+          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -138,6 +140,7 @@ jobs:
           mkdir -p package
           mv ./Artifacts/include ./package/
           mv ./Artifacts/lib  ./package/vc_x64_lib
+          cp -r ./ImageMagick/Magick++/lib/Magick++ ./package/
           # mv ./include ./package/
           # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
@@ -235,29 +238,29 @@ jobs:
 
       - name: Compress Artifacts
         run: |
-          cd ./artifacts/vc_lib_dbg_win32
-          zip -r ../vc_lib_dbg_win32.zip ./*
+          # cd ./artifacts/vc_lib_dbg_win32
+          # zip -r ../vc_lib_dbg_win32.zip ./*
 
-          cd ../vc_lib_rel_win32
-          zip -r ../vc_lib_rel_win32.zip ./*
+          # cd ../vc_lib_rel_win32
+          # zip -r ../vc_lib_rel_win32.zip ./*
 
-          cd ../vc_lib_dbg_x64
+          cd ./artifacts/vc_lib_dbg_x64
           zip -r ../vc_lib_dbg_x64.zip ./*
 
           cd ../vc_lib_rel_x64
           zip -r ../vc_lib_rel_x64.zip ./*
 
-          cd ../vc_dll_dbg_win32
-          zip -r ../vc_dll_dbg_win32.zip ./*
+          # cd ../vc_dll_dbg_win32
+          # zip -r ../vc_dll_dbg_win32.zip ./*
 
-          cd ../vc_dll_rel_win32
-          zip -r ../vc_dll_rel_win32.zip ./*
+          # cd ../vc_dll_rel_win32
+          # zip -r ../vc_dll_rel_win32.zip ./*
 
-          cd ../vc_dll_dbg_x64
-          zip -r ../vc_dll_dbg_x64.zip ./*
+          # cd ../vc_dll_dbg_x64
+          # zip -r ../vc_dll_dbg_x64.zip ./*
 
-          cd ../vc_dll_rel_x64
-          zip -r ../vc_dll_rel_x64.zip ./*
+          # cd ../vc_dll_rel_x64
+          # zip -r ../vc_dll_rel_x64.zip ./*
 
       - name: Generate MD5 Checksums
         run: |
