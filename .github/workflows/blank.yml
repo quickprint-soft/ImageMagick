@@ -62,14 +62,7 @@ jobs:
           cd Configure\Artifacts\Release\x64
           Configure.Release.x64.exe /noWizard /VS2022 /x64 /static /noHdri /Q16 /openPolicy /incompatibleLicense /includeOptional
           
-        # run: |
-        #   $use_utf8 = "${{ matrix.use_utf8 }}" ? 1 : 0
-        #   if ( $use_utf8 ) {
-        #     $txt = Get-Content setup.h
-        #     Write-Output $txt |
-        #     %{$_ -replace "define wxUSE_UNICODE_UTF8 0", "define wxUSE_UNICODE_UTF8 $use_utf8"} |
-        #     Set-Content setup.h
-        #   }
+     
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
@@ -78,24 +71,26 @@ jobs:
 
       - name: Build
         run: |
-          msbuild /noLogo /m "/p:Configuration=${{ matrix.configuration }}" /p:Platform=${{ matrix.platform }} build\msw\wx_vc16.sln
-          if ( '${{ matrix.configuration }}'.IndexOf('DLL') -ne -1 ) {
-            if ( '${{ matrix.platform }}' -eq 'Win32') {
-              $dlldir = Join-Path (Get-Location) 'lib\vc_dll'
-            } else {
-              $dlldir = Join-Path (Get-Location) 'lib\vc_x64_dll'
-            }
-            Write-Output "Adding $dlldir to the PATH"
-            $dlldir | Out-File -Append $env:GITHUB_PATH
-          }
+          msbuild /noLogo /m "/p:Configuration=${{ matrix.configuration }}" /p:Platform=${{ matrix.platform }} IM7.Static.x64.sln
+          #if ( '${{ matrix.configuration }}'.IndexOf('DLL') -ne -1 ) {
+          #  if ( '${{ matrix.platform }}' -eq 'Win32') {
+          #    $dlldir = Join-Path (Get-Location) 'lib\vc_dll'
+          #  } else {
+          #    $dlldir = Join-Path (Get-Location) 'lib\vc_x64_dll'
+          #  }
+          #  Write-Output "Adding $dlldir to the PATH"
+          #  $dlldir | Out-File -Append $env:GITHUB_PATH
+          #}
 
       # Static library packaging (删除 .pdb)
       - name: Package Debug files (Win32)
         if: matrix.configuration == 'Debug' && matrix.platform == 'Win32'
         run: |
           mkdir -p package
-          mv ./include ./package/
-          mv ./lib/vc_lib ./package/
+          mv ./Artifacts/include ./package/
+          mv ./Artifacts/lib  ./package/vc_lib
+          #mv ./include ./package/
+          #mv ./lib/vc_lib ./package/
           Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
       - name: Upload Debug artifact (Win32)
         if: matrix.configuration == 'Debug' && matrix.platform == 'Win32'
@@ -108,8 +103,10 @@ jobs:
         if: matrix.configuration == 'Release' && matrix.platform == 'Win32'
         run: |
           mkdir -p package
-          mv ./include ./package/
-          mv ./lib/vc_lib ./package/
+          mv ./Artifacts/include ./package/
+          mv ./Artifacts/lib  ./package/vc_lib
+          # mv ./include ./package/
+          # mv ./lib/vc_lib ./package/
           Get-ChildItem -Path ./package/vc_lib -Filter *.pdb -Recurse | Remove-Item -Force
       - name: Upload Release artifact (Win32)
         if: matrix.configuration == 'Release' && matrix.platform == 'Win32'
@@ -122,8 +119,11 @@ jobs:
         if: matrix.configuration == 'Debug' && matrix.platform == 'x64'
         run: |
           mkdir -p package
-          mv ./include ./package/
-          mv ./lib/vc_x64_lib ./package/
+          mv ./Artifacts/include ./package/
+          mv ./Artifacts/lib  ./package/vc_x64_lib
+          
+          # mv ./include ./package/
+          # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
       - name: Upload Debug artifact (x64)
         if: matrix.configuration == 'Debug' && matrix.platform == 'x64'
@@ -136,8 +136,10 @@ jobs:
         if: matrix.configuration == 'Release' && matrix.platform == 'x64'
         run: |
           mkdir -p package
-          mv ./include ./package/
-          mv ./lib/vc_x64_lib ./package/
+          mv ./Artifacts/include ./package/
+          mv ./Artifacts/lib  ./package/vc_x64_lib
+          # mv ./include ./package/
+          # mv ./lib/vc_x64_lib ./package/
           Get-ChildItem -Path ./package/vc_x64_lib -Filter *.pdb -Recurse | Remove-Item -Force
       - name: Upload Release artifact (x64)
         if: matrix.configuration == 'Release' && matrix.platform == 'x64'
