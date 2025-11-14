@@ -54,9 +54,12 @@ jobs:
           clone-repositories-im7.cmd
           
       - name: Configure build options
-        working-directory: Configure\Artifacts\Release\x64\bin
+        # working-directory: Configure\Artifacts\Release\x64\bin
         shell: cmd
         run: |
+          mkdir Configure\Artifacts\Release\x64
+          cp cfg/Configure.Release.x64.exe Configure\Artifacts\Release\x64
+          cd Configure\Artifacts\Release\x64
           Configure.Release.x64.exe /noWizard /VS2022 /x64 /static /noHdri /Q16 /openPolicy /incompatibleLicense /includeOptional
           
         # run: |
