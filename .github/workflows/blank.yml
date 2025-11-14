@@ -275,12 +275,12 @@ jobs:
           GH_TOKEN: ${{ secrets.MYUSER_TOKEN }}
         run: |
           cd ./artifacts
-          gh release upload $RELEASE_DATE ./vc_lib_dbg_win32.zip
-          gh release upload $RELEASE_DATE ./vc_lib_rel_win32.zip
+          # gh release upload $RELEASE_DATE ./vc_lib_dbg_win32.zip
+          # gh release upload $RELEASE_DATE ./vc_lib_rel_win32.zip
           gh release upload $RELEASE_DATE ./vc_lib_dbg_x64.zip
           gh release upload $RELEASE_DATE ./vc_lib_rel_x64.zip
-          gh release upload $RELEASE_DATE ./vc_dll_dbg_win32.zip
-          gh release upload $RELEASE_DATE ./vc_dll_rel_win32.zip
-          gh release upload $RELEASE_DATE ./vc_dll_dbg_x64.zip
-          gh release upload $RELEASE_DATE ./vc_dll_rel_x64.zip
+          # gh release upload $RELEASE_DATE ./vc_dll_dbg_win32.zip
+          # gh release upload $RELEASE_DATE ./vc_dll_rel_win32.zip
+          # gh release upload $RELEASE_DATE ./vc_dll_dbg_x64.zip
+          # gh release upload $RELEASE_DATE ./vc_dll_rel_x64.zip
           gh release upload $RELEASE_DATE ./filelist.txt
